@@ -9,6 +9,8 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
+import com.bolsadeideas.springboot.app.auth.filtro.JWTAutenticationFilter;
+import com.bolsadeideas.springboot.app.auth.filtro.JWTAuthorizationFilter;
 import com.bolsadeideas.springboot.app.auth.handler.LoginSuccessHandler;
 import com.bolsadeideas.springboot.app.models.service.JpaUserDetailsService;
 
@@ -28,14 +30,16 @@ public class SpringSecurityConfig extends WebSecurityConfigurerAdapter {
 	@Override
 	protected void configure(HttpSecurity http) throws Exception {
 
-		http.authorizeRequests().antMatchers("/", "/css/**", "/js/**", "/images/**", "/listar**", "/locale").permitAll()
+		http.authorizeRequests().antMatchers("/", "/api/**", "/css/**", "/js/**", "/images/**", "/listar**", "/locale")
+				.permitAll()
 				/* .antMatchers("/ver/**").hasAnyRole("USER") */
 				/* .antMatchers("/uploads/**").hasAnyRole("USER") */
 				/* .antMatchers("/form/**").hasAnyRole("ADMIN") */
 				/* .antMatchers("/eliminar/**").hasAnyRole("ADMIN") */
 				/* .antMatchers("/factura/**").hasAnyRole("ADMIN") */
-				.anyRequest().authenticated().and()
-				.csrf().disable().sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS);
+				.anyRequest().authenticated().and().addFilter(new JWTAutenticationFilter(authenticationManager()))
+				.addFilter(new JWTAuthorizationFilter(authenticationManager())).csrf().disable().sessionManagement()
+				.sessionCreationPolicy(SessionCreationPolicy.STATELESS);
 	}
 
 	@Autowired
